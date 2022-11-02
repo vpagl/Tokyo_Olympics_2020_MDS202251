@@ -1,0 +1,303 @@
+---
+title: '**Visualization Project**'
+header-includes:
+  \usepackage{fvextra}
+  \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+output:
+  html_document: default
+  pdf_document: 
+    df_print: paged
+  word_document: default
+urlcolor: blue
+date: "`r Sys.Date()`"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(cowplot)
+library(dplyr)
+library(reshape2)
+library(latex2exp)
+library(stringb)
+library(plotly)
+```
+
+
+\begin{centering}
+
+\LARGE
+{\bf Tokoyo Olympics 2020}
+
+\vspace{1cm}
+
+\Large
+Varun Pramod Agrawal
+
+\vspace{0.3cm}
+
+\large
+Roll No: MDS202251
+
+\large
+DG1107: Visualization
+
+\large
+Email: \href{mailto:varuna@cmi.ac.in}{varuna@cmi.ac.in}
+
+\large
+Chennai Mathematical Institute
+
+\end{centering}
+
+\newpage
+
+\begin{centering}
+
+\vspace*{1cm}
+
+\Large
+\textbf {Abstract}
+
+\end{centering}
+
+\vspace{0.3cm}
+
+\ \ \ In this project, We will perform EDA on Countries and their performances in Tokyo Olympics 2020. We will also see the gender trends across various sports disciplines. For this, we will use visualization techniques to describe the performance and other patterns in the data. Then we aim to deploy an analytics dashboard that will present the analysis in a user-friendly and attractive way.
+
+**Keywords** : Country, Medal, Discipline, R, Ggplot2, Visualization.
+
+\vspace{1cm}
+
+
+\vspace*{1cm}
+
+\renewcommand{\contentsname}{Table of Contents}
+
+\renewcommand{\baselinestretch}{2.0}\normalsize
+\tableofcontents
+\renewcommand{\baselinestretch}{1.0}\normalsize
+
+\newpage
+
+
+## 1. *Introduction:*
+
+\vspace{0.3cm}
+
+\ \ \ The Tokyo 2020 Games were an unprecedented demonstration of unity and solidarity as the world came together for the first time following the onset of the COVID-19 pandemic for an Olympic Games focused on the pure essentials: a celebration of athletes and sport.
+The event program for the 2020 Summer Olympics was approved by the IOC executive board on 9 June 2017. IOC president Thomas Bach stated that their goal was to give the Games "youthful" and "urban" appeal and to increase the number of female participants.
+
+\ \ \ The Games featured 339 events in 33 different sports, encompassing a total of 50 disciplines with around 206 National Olympic Committees and over 11,000 athletes.
+
+\vspace{1cm}
+
+## 2. *DataSet Description:*
+
+\vspace{0.3cm}
+
+\ \ \ We have chosen following 3 datasets from Kaggle:  
+
+* [Medals](https://www.kaggle.com/datasets/jeronimojr/tokyo-2021-medal-table?select=tokyo_2021.csv)
+  - Have details of the medal tally and the ranking of the 93 countries and the Country names having been translated to English while uploading
+
+* [Teams](https://www.kaggle.com/datasets/arjunprasadsarkhel/2021-olympics-in-tokyo?select=Teams.xlsx)
+  - Have details of teams of the countries taking part in which disciplines in total of 743 rows
+* [Gender Entries](https://www.kaggle.com/datasets/arjunprasadsarkhel/2021-olympics-in-tokyo?select=EntriesGender.xlsx)
+  - The distribution of Males and Females across 47 different sports disciplines.
+
+\vspace{1cm}
+
+## 3. *Objectives:*
+
+\vspace{0.3cm}
+
+Using the above dataset, we will describe the following:
+
+- How did a country perform compared to others
+- How is the gender of athletes distributed across different sports categories? 
+- How many different sports the country has taken part in
+- Which countries have the most number of teams participating.
+
+\ \ \ The above objectives can be achieved by plotting bar plots, pie charts, and line plots.The above objectives can be achieved by plotting bar plots, pie chart and line plots.
+
+\vspace{1cm}
+
+\newpage
+## 4. *EDA Summary*
+
+\vspace{0.3cm}
+
+```{r, echo= F}
+m_df <- as.data.frame(read.csv("E:\\Visualizatio\\Tokyo_Olympics\\tokyo_2021.csv"))
+g_df <- as.data.frame(read.csv("E:\\Visualizatio\\Tokyo_Olympics\\EntriesGender.csv"))
+t_df <- as.data.frame(read.csv("E:\\Visualizatio\\Tokyo_Olympics\\Teams.csv"))
+#gender
+males <- sum(g_df[,'Male'])
+females <- sum(g_df[,'Female'])
+
+df1 <- data.frame(
+  group = c("Male", "Female"),
+  value = c(males,females)
+)
+g_melt_df <- melt(g_df, id = c('Total',"Discipline"))
+#medal
+melt_df <- melt(df, id = c("X", "Country"))
+new_df = m_df[,c('X','Country','Gold','Silver','Bronze')]
+new_melt_df = melt(new_df, id = c('X','Country'))
+for_line_df = m_df[c(1,2,3,4,5,6,7,8,9,10),]
+line_melt_df = melt(for_line_df, id = c('X','Country'))
+
+#team
+tnum_df <- as.data.frame(table(t_df$NOC))
+tnum_df <- tnum_df[with(tnum_df, order(-Freq)),]
+tnum_df <- tnum_df[1:20,]
+dist_df <- t_df %>%
+  group_by(NOC) %>%
+  summarize(Number = n_distinct(Discipline))
+
+
+dist_df <- as.data.frame(dist_df)
+```
+
+```{r, echo=F, warning=F, fig.show='hide'}
+#png(filename = "1fig.png", width = 1200, height = 1200)
+ggplot(new_melt_df,aes(reorder(Country, -X),value, fill = factor(variable, levels = c("Bronze", "Silver", "Gold")) )) +
+  geom_col() + theme_minimal() + theme(
+    legend.position = "top",
+    legend.justification = c("top"),
+    legend.box.just = "top",
+    legend.margin = margin(6, 6, 6, 6),
+    legend.title = element_blank(),
+  ) + coord_flip() +
+  scale_fill_discrete(breaks=c("Gold","Silver","Bronze")) +
+  scale_fill_manual(values = c("Gold" = "#d6af36",
+                               "Silver" = "#d7d7d7",
+                               "Bronze" = "#a77044")) +
+  xlab('No. of Medals') + ylab('Country Name') +
+  ggtitle('Country Performance') + 
+    labs(fill = "",
+       caption = "We see the distribution of Gold, Silver and, Bronze medals for various countries ranked by no. of  Gold medals awarded." ,
+       subtitle = "Ranked Highest(Top) to Lowest(Bottom) "
+        )
+  
+#dev.off()
+```
+```{r, echo = FALSE, warning=FALSE, out.width= '90%', out.height="140%"}
+knitr::include_graphics("E:/Visualizatio/Tokyo_Olympics/1fig.png")
+```
+\newpage
+ **Figure 1**: We see the distribution of Gold, Silver and, Bronze medals for various countries ranked by no. of  Gold medals awarded.
+
+```{r, echo=F, warning=F}
+
+ggplot(line_melt_df,aes(reorder(Country, +X),value, color = variable)) +
+  geom_point(size = 4) + 
+  geom_line(aes(group = variable, color = variable, fill = variable))+
+  theme_minimal() + 
+  theme(
+    legend.position = "right",
+    legend.justification = c("right"),
+    legend.box.just = "right",
+    legend.margin = margin(6, 6, 6, 6),
+    legend.title = element_blank(),
+    axis.text.x = element_text(angle = 60, vjust = 1, hjust=1),
+  ) + ylim(0,140) + xlab("Country Name") + ylab("Number of Medals")+
+  ggtitle('Medal Tally of Top 10') +
+  labs(fill = "",
+       caption = "Representing performance of top 10 ranked Countries." ,
+        ) + 
+  scale_fill_discrete(breaks=c("Gold","Silver","Bronze", "Total")) +
+  scale_fill_manual(values = c("Gold" = "#d6af36",
+                               "Silver" = "#d7d7d7",
+                               "Bronze" = "#a77044",
+                               "Total" = "magenta")) 
+  
+```
+
+**Figure 2**: Representing performance of top 10 ranked Countries.
+\newpage
+```{r, echo=F, warning=F, message=F}
+
+ggplot(df1, aes(x="", y=value, fill=group)) +
+  geom_bar(width = 1, stat = "identity", color = "white", alpha = 0.8) +   coord_polar("y", start = 0) +
+  theme_void() + 
+  geom_text(aes(y = (cumsum(value) - 0.5*value), label = value), size=3, color = "white") +
+  scale_fill_brewer(palette="Set1") + 
+  ggtitle('Total no. of Males vs Females') + 
+    labs(fill = "",
+       caption = "Participation of Males vs Females" ,
+       
+        )
+```
+
+**Figure 3**: **Pie Chart** Participation of Males vs Females
+\newpage
+```{r, echo=F, warning=F, message=F}
+
+ggplot(g_melt_df,aes(reorder(Discipline, -Total),value, fill = variable )) +
+  geom_col() + theme(
+    legend.position = "top",
+    legend.justification = c("top"),
+    legend.box.just = "top",
+    legend.margin = margin(6, 6, 6, 6),
+    legend.title = element_blank(),
+    axis.text.x = element_text(angle = 60, vjust = 0.9, hjust=1),
+  ) +
+  scale_fill_discrete(breaks=c("Male","Female")) +
+  xlab('Discipline') + ylab('No. of Participants') + 
+  ggtitle('Participation of Athletes')
+```
+
+**Figure 4**: Participation of athletes in each discipline.
+\newpage
+```{r, echo=F, warning=F, message=F}
+ggplot(tnum_df,aes(reorder(Var1,-Freq),Freq, fill = Freq)) +
+  
+   geom_linerange(
+    aes(x = reorder(Var1,-Freq), ymin = 0, ymax = Freq, group = Freq), 
+    color = "lightgray", size = 1.5,
+    position = position_dodge(0.3)
+    )+
+  geom_point(
+    position = position_dodge(0.3), size = 4
+    ) +
+  
+  
+  
+  #geom_bar(stat = 'identity') + 
+  theme_minimal() + theme(
+    legend.position = "none",
+    axis.text.x = element_text(angle = 60, vjust = 1, hjust=1),
+  ) + scale_fill_gradient(low="blue",high="red") + 
+  ylab("No. of Teams") + xlab("Country Name") +
+  ggtitle("Country Teams")
+```
+
+**Figure 5**: Top 20 countries with highest number of teams participating.
+\newpage
+
+## 5. *Summary*
+
+\vspace{0.3cm}
+
+- the United States ranked no. 1 Country in terms of total no. of medals as well as no. of gold medals
+- There is almost 50%-50% participation of Male and Female athletes in the Olympics
+- Athletics got the most participation
+- Japan had the most number of different teams taking part followed by the United States 
+\vspace{1cm}
+
+\vspace{1cm}
+
+## 5. *Acknowledgments*
+I would like to thank Prof. Sourish Das for his guidance in making this project.
+
+\vspace{1cm}
+## *References:*
+
+* Kaggle  <br />
+     - [https://www.kaggle.com/datasets/jeronimojr/tokyo-2021-medal-table?select=tokyo_2021.csv](https://www.kaggle.com/datasets/jeronimojr/tokyo-2021-medal-table?select=tokyo_2021.csv) <br />
+     - [https://www.kaggle.com/datasets/arjunprasadsarkhel/2021-olympics-in-tokyo?select=Teams.xlsx](https://www.kaggle.com/datasets/arjunprasadsarkhel/2021-olympics-in-tokyo?select=Teams.xlsx) <br />
+     - [https://www.kaggle.com/datasets/arjunprasadsarkhel/2021-olympics-in-tokyo?select=EntriesGender.xlsx](https://www.kaggle.com/datasets/arjunprasadsarkhel/2021-olympics-in-tokyo?select=EntriesGender.xlsx) </br>
+* [Wikipedia](https://en.wikipedia.org/wiki/2020_Summer_Olympics) <br />
+* [Tokyo Olympics Official Website](https://olympics.com/en/olympic-games/tokyo-2020)
