@@ -48,6 +48,10 @@ Email: \href{mailto:varuna@cmi.ac.in}{varuna@cmi.ac.in}
 \large
 Chennai Mathematical Institute
 
+
+
+
+
 \end{centering}
 
 \newpage
@@ -142,7 +146,7 @@ df1 <- data.frame(
 )
 g_melt_df <- melt(g_df, id = c('Total',"Discipline"))
 #medal
-melt_df <- melt(df, id = c("X", "Country"))
+melt_df <- melt(m_df, id = c("X", "Country"))
 new_df = m_df[,c('X','Country','Gold','Silver','Bronze')]
 new_melt_df = melt(new_df, id = c('X','Country'))
 for_line_df = m_df[c(1,2,3,4,5,6,7,8,9,10),]
@@ -301,3 +305,7 @@ I would like to thank Prof. Sourish Das for his guidance in making this project.
      - [https://www.kaggle.com/datasets/arjunprasadsarkhel/2021-olympics-in-tokyo?select=EntriesGender.xlsx](https://www.kaggle.com/datasets/arjunprasadsarkhel/2021-olympics-in-tokyo?select=EntriesGender.xlsx) </br>
 * [Wikipedia](https://en.wikipedia.org/wiki/2020_Summer_Olympics) <br />
 * [Tokyo Olympics Official Website](https://olympics.com/en/olympic-games/tokyo-2020)
+
+## *Shiny Apps*
+* [Presentation](https://youtu.be/9pbSvBhkweU)
+* [Dashboard](https://varunagl10.shinyapps.io/Tokyo_2020/)
